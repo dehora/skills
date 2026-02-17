@@ -16,6 +16,15 @@ scoop bucket add scoop-yakitrak https://github.com/yakitrak/scoop-yakitrak.git
 scoop install notesmd-cli
 ```
 
+## Config Files
+
+notesmd-cli stores its config in macOS Application Support (not dotfiles in `~`):
+
+- **CLI preferences:** `~/Library/Application Support/notesmd-cli/preferences.json` — stores the default vault name
+- **Obsidian vaults:** `~/Library/Application Support/obsidian/obsidian.json` — read by notesmd-cli to resolve vault paths
+
+Note: These paths are not suitable for dotfile managers like chezmoi that target `~`.
+
 ## Vault Management
 
 ### set-default
