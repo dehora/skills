@@ -1,0 +1,15 @@
+[project]
+name = "skills"
+version = "0.1.0"
+description = "AI skills for Claude Code"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
