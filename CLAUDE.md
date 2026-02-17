@@ -45,6 +45,7 @@ pytest
 pytest tests/test_foo.py::test_bar   # single test
 
 # Install a skill locally (symlink into personal skills)
+mkdir -p ~/.claude/skills
 ln -s $(pwd)/skills/<skill-name> ~/.claude/skills/<skill-name>
 ```
 
