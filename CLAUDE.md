@@ -33,15 +33,15 @@ Optional frontmatter fields: `disable-model-invocation`, `user-invocable`, `mode
 ## Commands
 
 ```bash
-# Python setup
+# Python setup — always use uv, never call python/pip directly
 uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 
 # Lint (line-length 100 per pyproject.toml)
-ruff check scripts/
+uv run ruff check scripts/
 
 # Tests
-pytest
+uv run pytest
 pytest tests/test_foo.py::test_bar   # single test
 
 # Install a skill locally (symlink into personal skills)

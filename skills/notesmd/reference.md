@@ -182,6 +182,19 @@ notesmd-cli frontmatter "{note-name}" --delete --key "{field}"
 - `--value "{value}"` — Frontmatter field value
 - `--vault "{vault-name}"` — Target a specific vault
 
+## Custom Scripts
+
+### last.py
+
+List the most recently modified notes in the default vault sorted by modification time (newest first). Uses `notesmd-cli print-default --path-only` to locate the vault, then walks `*.md` files excluding `.obsidian/` and `.trash/`.
+
+```bash
+python skills/notesmd/scripts/last.py       # 10 most recent (default)
+python skills/notesmd/scripts/last.py 5     # 5 most recent
+```
+
+Output format: `YYYY-MM-DD HH:MM  relative/note/path` (no `.md` extension).
+
 ## Global Flags
 
 These flags are available on most commands:

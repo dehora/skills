@@ -28,6 +28,7 @@ Consult `reference.md` in this skill directory for the full command reference wi
 | `move "{from}" "{to}"` | Move or rename a note |
 | `delete "{note}"` | Delete a note |
 | `frontmatter "{note}"` | Manage YAML frontmatter (`--print`, `--edit`/`--delete` with `--key`/`--value`) |
+| `python scripts/last.py [N]` | Show N most recently modified notes (default 10) |
 
 ## Workflow Guidance
 
@@ -83,6 +84,14 @@ notesmd-cli create "projects/alpha" --content "## Update $(date +%Y-%m-%d)
 notesmd-cli list "journal"
 # Print a specific one
 notesmd-cli print "journal/2025-01-15"
+```
+
+### Recent notes
+```bash
+# Show 10 most recently modified notes
+python skills/notesmd/scripts/last.py
+# Show 5 most recent
+python skills/notesmd/scripts/last.py 5
 ```
 
 ### Manage frontmatter
