@@ -29,6 +29,7 @@ Consult `reference.md` in this skill directory for the full command reference wi
 | `delete "{note}"` | Delete a note |
 | `frontmatter "{note}"` | Manage YAML frontmatter (`--print`, `--edit`/`--delete` with `--key`/`--value`) |
 | `python scripts/last.py [N]` | Show N most recently modified notes (default 10) |
+| `python scripts/today.py` | Show notes created or modified since midnight today |
 
 ## Workflow Guidance
 
@@ -92,6 +93,8 @@ notesmd-cli print "journal/2025-01-15"
 python skills/notesmd/scripts/last.py
 # Show 5 most recent
 python skills/notesmd/scripts/last.py 5
+# Show notes modified today
+python skills/notesmd/scripts/today.py
 ```
 
 ### Manage frontmatter
