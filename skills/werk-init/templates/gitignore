@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+
+# Downloaded datasets
+data/
+!src/{{pkg}}/data/
+
+# Generated output
+output/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Secrets
+.env*
+*.pem
+*.key
+*.secret
+
+# OS
+.DS_Store
