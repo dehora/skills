@@ -11,8 +11,10 @@ skills/
 │       ├── SKILL.md    # Entrypoint with YAML frontmatter
 │       ├── reference.md
 │       └── scripts/
-└── agents/             # Persona files loaded by ~/.claude/commands/agent.md
-    └── <name>.md
+├── agents/             # Persona files loaded by ~/.claude/commands/agent.md
+│   └── <name>.md
+├── hooks/              # Reusable git hook scripts (symlink into .git/hooks/)
+└── schedules/          # cron / launchd recipes you install manually
 ```
 
 ## Available skills
@@ -28,8 +30,15 @@ skills/
 ## Available agents
 
 - **staff-engineer** — Senior code reviewer for werk lessons (layering, scope, tests, numerics, narrative drift).
+- **applied-scientist** — Math / algorithm reviewer (paper fidelity, derivations, numerical stability, notation correspondence).
+- **pedagogy-reviewer** — Narrative & lesson-flow editor (term hygiene, exposition order, plot interpretation, closing).
 
 (`carol` — security auditor — lives directly in `~/.claude/agents/carol.md` for now.)
+
+## Hooks and schedules
+
+- `hooks/` — see [hooks/README.md](hooks/README.md). Pre-commit scripts for werk projects (`werk-tests.sh`, `werk-stale-transcript.sh`).
+- `schedules/` — see [schedules/README.md](schedules/README.md). cron / launchd recipes for nightly transcript regen and weekly layering audits.
 
 ## Installation
 
