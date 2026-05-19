@@ -1,6 +1,6 @@
 ---
 name: roborev
-description: Use when the user invokes /roborev to get an external code review (codex CLI or equivalent) on the current branch's diff against a base ref. Returns a carol-style structured findings report. Local only — not a CI step.
+description: Use when the user invokes /roborev to get an external code review (codex CLI or equivalent) on the current branch's diff against a base ref. Returns a carol-style structured findings report. Local only—not a CI step.
 user-invocable: true
 argument-hint: [--base <ref, default main>] [--reviewer codex|claude] [--scope diff|files]
 allowed-tools: Bash, Read
@@ -14,9 +14,9 @@ Important: this is local only. It does not push, comment on PRs, or talk to any 
 
 ## Arguments
 
-- `--base <ref>` — base ref to diff against. Defaults to `main`. Falls back to `master` if `main` doesn't exist.
-- `--reviewer codex|claude` — which external CLI to invoke. Defaults to `codex`.
-- `--scope diff|files` — `diff` (default) pipes the unified diff to the reviewer; `files` lists the changed file paths and lets the reviewer read them.
+- `--base <ref>`—base ref to diff against. Defaults to `main`. Falls back to `master` if `main` doesn't exist.
+- `--reviewer codex|claude`—which external CLI to invoke. Defaults to `codex`.
+- `--scope diff|files`—`diff` (default) pipes the unified diff to the reviewer; `files` lists the changed file paths and lets the reviewer read them.
 
 ## Preflight
 
@@ -31,7 +31,7 @@ Important: this is local only. It does not push, comment on PRs, or talk to any 
    git log --oneline <base>..HEAD
    git diff --stat <base>..HEAD
    ```
-4. Refuse if working tree is dirty (`git status --porcelain` non-empty) — the reviewer should look at committed changes, not in-progress edits. Tell the user to stash or commit first.
+4. Refuse if working tree is dirty (`git status --porcelain` non-empty)—the reviewer should look at committed changes, not in-progress edits. Tell the user to stash or commit first.
 5. Check that the selected reviewer CLI is on PATH:
    - `codex` → `command -v codex`
    - `claude` → `command -v claude` (any `claude` CLI)
@@ -57,7 +57,7 @@ git diff <base>..HEAD | codex exec --quiet \
 
   Severity levels: Critical, High, Medium, Low, Info.
   End with an 'Already handled' section noting controls that look correct.
-  Do not invent issues — if there are no findings at a level, say so."
+  Do not invent issues—if there are no findings at a level, say so."
 ```
 
 For `--scope files`: list changed files via `git diff --name-only <base>..HEAD` and pass them as `--cd` / context hints depending on what the reviewer supports.
@@ -66,7 +66,7 @@ For `--reviewer claude`: substitute the `claude -p ...` non-interactive form.
 
 ## Parse and present
 
-The external reviewer is expected to return prose in the `[SEVERITY] ...` format above. Do not try to reformat or summarize aggressively — pass the findings through verbatim, but:
+The external reviewer is expected to return prose in the `[SEVERITY] ...` format above. Do not try to reformat or summarize aggressively—pass the findings through verbatim, but:
 
 - Re-emit each finding as a Markdown block with bold severity tag.
 - Group findings under H3s by severity: Critical, High, Medium, Low, Info.
@@ -95,5 +95,5 @@ Alternatively, run /roborev --reviewer claude to use a local claude CLI.
 ## Notes
 
 - This skill does NOT add `Co-Authored-By:` trailers or modify any files. It is read-only beyond the reviewer process.
-- The diff is piped through stdin to the reviewer — no diff file is written to disk.
+- The diff is piped through stdin to the reviewer—no diff file is written to disk.
 - If the user wants ongoing review, run this skill once per significant push, not per commit.
