@@ -96,12 +96,12 @@ Print:
 Created <repo>/skills/<name>/{SKILL.md[, reference.md][, scripts/]}
 
 Next:
-  1. Edit SKILL.md — fill in argument-hint, body sections.
+  1. Edit SKILL.md—fill in argument-hint, body sections.
   2. /sync-skills --fix    # link into ~/.claude/skills/
   3. Verify the new skill appears in the harness's available-skills list on the next session start.
 ```
 
 ## Notes
 
-- Don't write tests as part of scaffolding — the surrounding skills pattern (notesmd, todoist, roborev) doesn't ship tests, and a `.gitkeep` in `tests/` would lie about coverage. Add tests deliberately when the skill grows enough to need them.
+- Don't write tests as part of scaffolding—the surrounding skills pattern (notesmd, todoist, roborev) doesn't ship tests, and a `.gitkeep` in `tests/` would lie about coverage. Add tests deliberately when the skill grows enough to need them.
 - The collision check list is hand-maintained. If a new built-in skill ships in Claude Code, add it. The cost of a missed collision is a silent shadow at the slash-command layer—worth the small list-maintenance overhead.

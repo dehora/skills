@@ -10,17 +10,17 @@ allowed-tools: Bash, Read
 
 Symlinks under `~/.claude/skills/` and `~/.claude/agents/` drift quickly when skills are added, renamed, or moved between repos. This skill walks the canonical source repos, walks the current symlinks, and surfaces three classes of issue:
 
-- **missing** — a skill or agent exists in a source repo but isn't symlinked
-- **broken** — the symlink exists but its target doesn't
-- **extra** — a symlink in `~/.claude/` points at a path that isn't claimed by any configured source
+- **missing**—a skill or agent exists in a source repo but isn't symlinked
+- **broken**—the symlink exists but its target doesn't
+- **extra**—a symlink in `~/.claude/` points at a path that isn't claimed by any configured source
 
 By default it only reports. With `--fix`, it creates missing links, deletes broken links, and leaves extra links alone (extras are flagged for review since they might be intentional one-offs).
 
 ## Arguments
 
-- `--fix` — apply the proposed changes after reporting them.
-- `--dry-run` — print what `--fix` would do without changing anything (default behavior when `--fix` is absent; explicit `--dry-run` makes intent obvious in shared environments).
-- `--source <repo-path>` (repeatable) — override the default source list. Defaults to `/Users/bill/projects/dehora/skills` and `/Users/bill/projects/dehora/werk-kit`. Each source is expected to contain `skills/<name>/SKILL.md` and/or `agents/<name>.md`.
+- `--fix`—apply the proposed changes after reporting them.
+- `--dry-run`—print what `--fix` would do without changing anything (default behavior when `--fix` is absent; explicit `--dry-run` makes intent obvious in shared environments).
+- `--source <repo-path>` (repeatable)—override the default source list. Defaults to `/Users/bill/projects/dehora/skills` and `/Users/bill/projects/dehora/werk-kit`. Each source is expected to contain `skills/<name>/SKILL.md` and/or `agents/<name>.md`.
 
 ## Run
 
@@ -54,7 +54,7 @@ sync-skills: 6 OK, 1 missing, 1 broken (no changes; pass --fix to apply).
 ```
 
 ```
-sync-skills: 8 OK, 1 missing, 1 broken — fixed.
+sync-skills: 8 OK, 1 missing, 1 broken—fixed.
   +link  ~/.claude/skills/ship                -> /Users/bill/projects/dehora/skills/skills/ship
   -link  ~/.claude/agents/staff-engineer.md   (broken)
 ```
