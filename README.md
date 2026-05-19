@@ -17,8 +17,9 @@ skills/
 
 - **notesmd**—Manage Obsidian vault notes via [notesmd-cli](https://github.com/yakitrak/notesmd-cli).
 - **todoist**—Manage Todoist tasks via the official `@doist/todoist-cli`.
-- **roborev**—Run an external reviewer (codex/claude CLI) against the current branch diff and surface findings inline.
-- **ship**—Commit and push staged work with a present-tense subject, Claude co-author trailer, GPG/SSH preflight, and a guard against direct pushes to `main`/`master`.
+- **roborev**—Run an on-demand code review via the local roborev daemon (against HEAD or `--dirty`) and surface structured findings inline. Read-only; never auto-fixes.
+- **audit**—Surface open roborev findings on the current branch and action them per the standing policy: auto-fix Critical+High, ask on Medium, skip Low/Info. Closes the manual filter loop between roborev and Claude.
+- **ship**—Commit and push staged work with a present-tense subject, Claude co-author trailer, GPG/SSH preflight, a guard against direct pushes to `main`/`master`, and a post-push roborev audit step (skip with `--no-audit`).
 - **sync-skills**—Reconcile `~/.claude/skills/` and `~/.claude/agents/` symlinks against the source repos. Reports missing, broken, and extra links; `--fix` applies.
 - **new-skill**—Scaffold a fresh `SKILL.md` (with reference.md and scripts/ stubs) under `skills/<name>/`. Checks for naming collisions against the built-in skill list before writing.
 - **new-agent**—Scaffold a carol-style persona file under `agents/<name>.md` and (by default) symlink it into `~/.claude/agents/` for use via `/agent --name=<name>`.

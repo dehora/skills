@@ -1,99 +1,97 @@
 ---
 name: roborev
-description: Use when the user invokes /roborev to get an external code review (codex CLI or equivalent) on the current branch's diff against a base ref. Returns a carol-style structured findings report. Local only—not a CI step.
+description: Use when the user invokes /roborev to run an on-demand code review via the local roborev daemon, against HEAD or uncommitted changes. Surfaces structured findings inline. Companion to /ship (commit-time audit) and /audit (catch-up).
 user-invocable: true
-argument-hint: [--base <ref, default main>] [--reviewer codex|claude] [--scope diff|files]
+argument-hint: "[--ref HEAD|<sha>] [--dirty] [--agent codex|claude-code|...] [--type security|design]"
 allowed-tools: Bash, Read
 ---
 
 ## What this skill does
 
-Runs an external reviewer against the current branch's diff and surfaces its findings inside this Claude Code session, formatted the same way as `~/.claude/agents/carol.md` (`[SEVERITY] Title / Location / Evidence / Recommendation / Effort`). The point is to bring an out-of-loop review step into the in-loop workflow.
+Asks the local roborev daemon to review either HEAD or the current uncommitted changes, waits for the result, and surfaces findings inline. This is the on-demand entry point. For per-commit audit see `/ship`; for catch-up over open findings on the branch see `/audit`.
 
-Important: this is local only. It does not push, comment on PRs, or talk to any remote system. The external reviewer runs against the local diff.
+The skill never auto-applies fixes. It reads, summarizes, and stops. To address findings, the user (or `/audit` in a separate invocation) drives the response.
 
 ## Arguments
 
-- `--base <ref>`—base ref to diff against. Defaults to `main`. Falls back to `master` if `main` doesn't exist.
-- `--reviewer codex|claude`—which external CLI to invoke. Defaults to `codex`.
-- `--scope diff|files`—`diff` (default) pipes the unified diff to the reviewer; `files` lists the changed file paths and lets the reviewer read them.
+- `--ref <sha>` (optional) — review a specific commit. Default is HEAD.
+- `--dirty` (optional) — review uncommitted changes instead of a commit. Useful before staging.
+- `--agent <name>` (optional) — override the default agent (`codex` per daemon config). Accepts `codex`, `claude-code`, `gemini`, `copilot`, `opencode`, `cursor`, `kiro`, `kilo`, `pi`.
+- `--type <kind>` (optional) — `security` or `design` switches the system prompt. Default is the general review prompt.
+
+If `--ref` and `--dirty` are both passed, refuse and ask which is intended.
 
 ## Preflight
 
-1. Verify cwd is a git repo (`git rev-parse --is-inside-work-tree`).
-2. Determine the base ref:
-   - If `--base` is provided, use it.
-   - Else use `main` if `git rev-parse --verify main` succeeds, otherwise `master`.
-   - If neither exists, stop and tell the user to pass `--base`.
-3. Compute the changed range:
-   ```bash
-   git rev-parse --abbrev-ref HEAD
-   git log --oneline <base>..HEAD
-   git diff --stat <base>..HEAD
+1. **Daemon running.** `roborev status` exits 0 and reports `Daemon: running`. If not, print:
    ```
-4. Refuse if working tree is dirty (`git status --porcelain` non-empty)—the reviewer should look at committed changes, not in-progress edits. Tell the user to stash or commit first.
-5. Check that the selected reviewer CLI is on PATH:
-   - `codex` → `command -v codex`
-   - `claude` → `command -v claude` (any `claude` CLI)
+   roborev daemon is not running. Start with: roborev daemon start
+   Then re-run /roborev.
+   ```
+   and stop.
+2. **In a git repo.** `git rev-parse --is-inside-work-tree` succeeds.
+3. **Repo is roborev-init'd.** `roborev repo list 2>&1 | grep -q "$(pwd)"` or the daemon will reject the review. If not, suggest:
+   ```
+   This repo is not registered with roborev. Initialize with:
+     cd "$(pwd)" && roborev init
+   Then re-run /roborev.
+   ```
 
-   If the binary is missing, print a clearly-marked install hint block (see "Reviewer setup" below) and stop without invoking anything.
+## Run
 
-## Invoke the reviewer
+Build the `roborev review` invocation:
 
-> NOTE: The exact `codex` invocation is not pinned upstream. Treat the block below as a starting point and confirm against the codex CLI version on the user's system before relying on it in scripts.
+- `--dirty` → `roborev review --dirty --wait`
+- otherwise → `roborev review <ref> --wait` (default ref: HEAD)
+- Pass `--agent <name>` and/or `--type <kind>` through if provided.
 
-For `--reviewer codex --scope diff`:
+`--wait` makes the call synchronous; capture stdout (which usually echoes the job header) and the exit code.
+
+Then fetch and parse the structured form:
 
 ```bash
-git diff <base>..HEAD | codex exec --quiet \
-  "You are a senior staff engineer doing a focused code review. Read the following unified diff and report findings in this exact format, one per finding:
-
-  [SEVERITY] Title
-  - Location: <file>:<line>
-  - Category: <category>
-  - Evidence: <quoted snippet or short description>
-  - Recommendation: <how to fix>
-  - Effort: Low|Medium|High
-
-  Severity levels: Critical, High, Medium, Low, Info.
-  End with an 'Already handled' section noting controls that look correct.
-  Do not invent issues—if there are no findings at a level, say so."
+# Get the job id of the most recently completed review for this ref.
+JOB=$(roborev list --json --limit 1 | python3 -c "import json,sys; d=json.load(sys.stdin) or []; print(d[0]['id']) if d else ''")
+python3 <SKILL_DIR>/scripts/roborev_query.py parse "$JOB" --job
 ```
 
-For `--scope files`: list changed files via `git diff --name-only <base>..HEAD` and pass them as `--cd` / context hints depending on what the reviewer supports.
+(`<SKILL_DIR>` resolves to this skill's directory at runtime; in practice substitute `/Users/bill/projects/dehora/skills/skills/roborev`.)
 
-For `--reviewer claude`: substitute the `claude -p ...` non-interactive form.
+## Surface
 
-## Parse and present
-
-The external reviewer is expected to return prose in the `[SEVERITY] ...` format above. Do not try to reformat or summarize aggressively—pass the findings through verbatim, but:
-
-- Re-emit each finding as a Markdown block with bold severity tag.
-- Group findings under H3s by severity: Critical, High, Medium, Low, Info.
-- Show the "Already handled" section last.
-- If the reviewer's output doesn't fit the format (e.g. plain prose), wrap it under a single `### Reviewer output` block and warn the user inline.
-
-End with a one-line summary:
-```
-roborev: <reviewer> reviewed <N> files (<M> findings: <crit>C/<high>H/<med>M/<low>L/<info>I).
-```
-
-## Reviewer setup (printed on missing CLI)
+Render the parsed output inline. Format mirrors `~/.claude/agents/carol.md` so output is visually consistent with `/audit` and the staff-engineer / applied-scientist reviewers.
 
 ```
-roborev requires an external reviewer CLI. Detected: <missing>.
+roborev: <agent> reviewed <sha> on <branch> (<repo>). Verdict: PASS|FAIL.
 
-To install codex:
-  https://github.com/openai/codex          # check upstream for current install steps
+### Critical
+(none)
 
-Once installed, verify with:
-  codex --version
+### High
+(none)
 
-Alternatively, run /roborev --reviewer claude to use a local claude CLI.
+### Medium
+**[Medium] <short title from the problem first sentence>**
+- **Location:** `file.py:line`, `file.py:line`
+- **Problem:** <verbatim problem text>
+- **Fix:** <verbatim fix text>
+
+### Low
+(none)
+
+### Summary
+<verdict-level summary from the review>
+```
+
+Severity sections are omitted entirely if empty; never print "(none)" five times. If the review is `No issues found.`, print:
+
+```
+roborev: <agent> reviewed <sha> on <branch> (<repo>). Verdict: PASS.
+No issues found. <summary>
 ```
 
 ## Notes
 
-- This skill does NOT add `Co-Authored-By:` trailers or modify any files. It is read-only beyond the reviewer process.
-- The diff is piped through stdin to the reviewer—no diff file is written to disk.
-- If the user wants ongoing review, run this skill once per significant push, not per commit.
+- This skill never closes the review (`roborev close`) and never adds a comment. It is read-only. `/audit` is the right entry point when the goal is to address findings.
+- The daemon's default reasoning level is `thorough` (~1–3 minutes per review). With `--agent claude-code` or `--type security` the time can be longer; `--fast` (passed through if needed) trades depth for speed.
+- The post-commit hook (if installed in the repo via `roborev install-hook`) already enqueues a review for every commit. `/roborev` is the right tool when you want one *now* without committing, or to re-read an existing review of HEAD without re-enqueuing.
